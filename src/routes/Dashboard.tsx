@@ -5,10 +5,12 @@ import { useAuth } from "../auth/AuthProvider";
 
 export default function Dashboard() {
   const [cats, setCats] = useState<any[]>([]);
+  const [breeds, setBreeds] = useState<any[]>([]);
   const auth = useAuth();
 
   useEffect(() => {
     getAllCats();
+    getAllBreeds();
   }, []);
 
   async function getAllCats() {
@@ -29,12 +31,40 @@ export default function Dashboard() {
     }
   }
 
+  async function getAllBreeds() {
+    try {
+      const breedResponse = await fetch(`${API_URL}/breeds`, {
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${auth.getAccessToken()}`,
+        },
+      });
+      if (breedResponse.status === 200) {
+        const breedsJson = await breedResponse.json();
+        setBreeds(breedsJson);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <div>
       <h1>Dashboard</h1>
+      <form>
+        <input type="text" placeholder="Cat Name" />
+        <select>
+          {breeds.map((breed) => (
+            <option key={breed.id} value={breed.name}>
+              {breed.name}
+            </option>
+          ))}
+        </select>
+      </form>
       {cats.map((cat) => (
         <div key={cat.id}>{cat.name}</div>
       ))}
     </div>
-  )
+  );
 }
